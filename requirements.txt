@@ -2,3 +2,8 @@ pinecone
 openai
 python-dotenv
 pyTelegramBotAPI
+haystack-ai
+pinecone-haystack
+sentence-transformers
+requests
+Pillow
