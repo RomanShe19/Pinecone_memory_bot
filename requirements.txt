@@ -7,3 +7,5 @@ pinecone-haystack
 sentence-transformers
 requests
 Pillow
+docling
+docling-haystack

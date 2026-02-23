@@ -1,9 +1,10 @@
-# Telegram-боты с “памятью” (Pinecone) + Haystack Agent
+# Telegram-боты с “памятью” (Pinecone) + Haystack
 
-Проект демонстрирует **долгосрочную память на Pinecone** (семантический поиск по истории диалога) и две реализации Telegram‑бота:
+Проект демонстрирует **долгосрочную память на Pinecone** (семантический поиск по истории диалога) и три реализации Telegram‑бота:
 
 - **Базовая**: `telegram_bot.py` + `pinecone_manager.py` (прямые вызовы OpenAI + Pinecone, дедупликация, namespace на пользователя)
 - **Агентная (Haystack)**: `Hay/hay-telegram-bot.py` (Haystack `Agent` + `ComponentTool`, инструменты: погода/факты/картинки собак, память через `PineconeDocumentStore`)
+- **Модульная v2 (Haystack + Docling)**: `hay_v2_bot/` (декомпозиция по модулям и пайплайнам, ingestion файлов и RAG по документам)
 
 ## Возможности
 
@@ -16,6 +17,11 @@
   - **Погода**: Open‑Meteo + Nominatim (без API‑ключа)
   - **Факт о собаках**: `dogapi.dog`
   - **Картинка собаки + описание породы**: `dog.ceo` + OpenAI Vision
+- **Обработка документов (v2)**:
+  - загрузка PDF/DOCX и других поддерживаемых Docling форматов
+  - анализ и чанкинг через Docling
+  - запись чанков в Pinecone
+  - краткое резюме файла после успешной обработки
 
 ## Стек
 
@@ -24,6 +30,7 @@
 - LLM: OpenAI (через `openai`) или совместимый endpoint (`OPENAI_BASE_URL`)
 - Память: Pinecone
 - Агент: Haystack (`haystack-ai`) + интеграция Pinecone (`pinecone-haystack`)
+- Document ingestion: Docling (`docling`, `docling-haystack`)
 
 ## Быстрый старт (Windows / PowerShell)
 
@@ -71,13 +78,24 @@ python hay-telegram-bot.py
 - **Команды**: `/start`, `/help`, `/clear`
 - Подробнее про эту реализацию: `Hay/README.md`
 
+### Haystack v2 (модульная архитектура + Docling)
+
+```bash
+python -m hay_v2_bot.main
+```
+
+- **Логи**: `hay_v2_bot.log`
+- **Команды**: `/start`, `/help`, `/clear`
+- **Дополнительно**: обработка документов с индексацией в Pinecone
+- Подробнее: `hay_v2_bot/README.md`
+
 ## Конфигурация
 
 Переменные окружения (см. `.env.example`):
 
 - `TELEGRAM_BOT_TOKEN`
 - `OPENAI_API_KEY`
-- `OPENAI_BASE_URL` (опционально, если используете прокси/совместимый endpoint)
+- `OPENAI_BASE_URL` (для `hay_v2_bot` обязателен; используется для всех OpenAI вызовов через прокси)
 - `PINECONE_API_KEY`
 - `PINECONE_INDEX_NAME`
 
@@ -88,6 +106,12 @@ VPg06/
 ├── Hay/
 │   ├── hay-telegram-bot.py      # Haystack Agent + инструменты + PineconeDocumentStore
 │   └── README.md                # Документация по Haystack-части
+├── hay_v2_bot/
+│   ├── components/              # Компоненты Haystack и инструменты
+│   ├── pipelines/               # Generation / ingestion / conversation pipelines
+│   ├── bot/                     # Telegram-обработчики
+│   ├── main.py                  # Entry point v2
+│   └── README.md                # Документация по модульной v2 версии
 ├── pinecone_manager.py          # Pinecone helper (базовая версия)
 ├── telegram_bot.py              # Базовый бот (OpenAI + PineconeManager)
 ├── requirements.txt
